@@ -1,0 +1,2 @@
+contextual-dot-async.mo:14.7-14.16: type error [M0072], field asyncFunc does not exist in type:
+  Text
