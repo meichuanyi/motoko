@@ -2,6 +2,7 @@
 
 * motoko (`moc`)
 
+  * feat: Search nested modules for implicit candidates. When module `M` is in scope, implicit resolution will now consider candidates like `M.N.compare` (#6084).
   * feat: Structural implicit derivation for records and tuples via `__record` and `__tuple` combiners. Per-field results are lazy thunks, enabling short-circuiting for operations like `compare` (#5903).
 
 ## 1.8.2 (2026-05-21)
