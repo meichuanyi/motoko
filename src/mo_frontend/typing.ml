@@ -4705,12 +4705,8 @@ and check_stab env sort scope dec_fields =
         "misplaced stability declaration on field of non-actor";
       []
     | (T.Actor | T.Mixin), _ , IncludeD (_, _, note) ->
-      begin match !note with
-      | None -> assert false
-      | Some note ->
-        let fs = check_stab env sort scope note.decs in
-        List.map (fun f -> {it = f.T.lab; at = no_region; note = ()}) fs
-      end
+      let _, fields = T.as_obj df.it.dec.note.note_typ in
+      List.map (fun f -> {it = f.T.lab; at = no_region; note = ()}) fields
     | (T.Actor | T.Mixin), Some {it = Stable view; _}, VarD (id, _) ->
       check_stable id.it id.at;
       infer_viewer env scope Var id view;
@@ -4872,16 +4868,17 @@ and check_init env pat_opt exp at =
 and infer_dec env dec : T.typ =
   let t =
   match dec.it with
-  | IncludeD (i, arg, n) ->
-    if not env.pre then begin
-      use_identifier env i.it;
-      if not env.in_actor then
-        error env dec.at "M0227" "mixins can only be included in an actor context";
-      match T.Env.find_opt i.it env.mixins with
-      | None -> error env i.at "M0226" "unknown mixin %s" i.it
-      | Some mix -> check_exp env mix.Scope.arg.note arg
-    end;
-    T.unit
+  | IncludeD (i, arg, n) -> begin
+    use_identifier env i.it;
+    if not env.pre && not env.in_actor then
+      error env dec.at "M0227" "mixins can only be included in an actor context";
+    match T.Env.find_opt i.it env.mixins with
+    | None -> error env i.at "M0226" "unknown mixin %s" i.it
+    | Some mix ->
+      if not env.pre then
+        check_exp env mix.Scope.arg.note arg;
+      mix.Scope.typ
+    end
   | ExpD exp -> infer_exp env exp
   | LetD (pat, exp, fail_opt) ->
     (match fail_opt with
