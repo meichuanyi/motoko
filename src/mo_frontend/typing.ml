@@ -4706,7 +4706,7 @@ and check_stab env sort scope dec_fields =
       []
     | (T.Actor | T.Mixin), _ , IncludeD (_, _, note) ->
       let _, fields = T.as_obj df.it.dec.note.note_typ in
-      List.map (fun f -> {it = f.T.lab; at = no_region; note = ()}) fields
+      List.map (fun f -> f.T.lab @@ df.it.dec.at) fields
     | (T.Actor | T.Mixin), Some {it = Stable view; _}, VarD (id, _) ->
       check_stable id.it id.at;
       infer_viewer env scope Var id view;
